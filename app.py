@@ -1,18 +1,52 @@
 import os
 import logging
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
-from utils import get_logger, restricted, log
+from utils import get_logger, restricted, log, log_command
 from pprint import pprint
 from random import choice
+from Quark import Quark
+
+
+QUARK = Quark('k4t0mono')
 
 @log
-def echo_text(bot, update):
-	msg = update.message
+@restricted
+def command_parse(bot, update):
+	text = update.message.text
 
+	if(text[0] == '.'):
+		(commad, *stuff) = text[1:].split()
+
+		if commad == 'log':
+			wallet = stuff[0] if len(stuff) else None
+			log = QUARK.get_log(wallet=wallet)
+			post_log(bot, update, log, wallet)
+
+	else:
+		(amout, desc) = text.split()
+		QUARK.add_transaction(amout, desc)
+		bot.send_message(
+			chat_id=update.message.chat_id,
+			text='Transaction added'
+		)
+
+
+@log
+def post_log(bot, update, log, wallet):
 	bot.send_message(
-		chat_id=msg.chat_id,
-		text=msg.text
+		chat_id=update.message.chat_id,
+		text='Transaction log from wallet {}'.format(wallet)
 	)
+
+	for t in log:
+		a = 'Amout: *{}*'.format(t.amout)
+		d = 'Desc: {}'.format(t.desc)
+
+		bot.send_message(
+			chat_id=update.message.chat_id,
+			parse_mode='Markdown',
+			text='{}\n{}'.format(a, d)
+		)
 
 
 @log
@@ -34,6 +68,9 @@ def get_help(bot, update):
 
 	txt = """
 Commands:
+
+*.log <wallet>*
+Get all transactions from the wallet
 
 */new_wallet <name> [balance]*
 Add a new wallet to the list
@@ -66,7 +103,7 @@ if __name__ == '__main__':
 	dispatcher = updater.dispatcher
 
 	dispatcher.add_handler(CommandHandler('help', get_help))
-	dispatcher.add_handler(MessageHandler(Filters.text, echo_text))
+	dispatcher.add_handler(MessageHandler(Filters.text, command_parse))
 	dispatcher.add_handler(MessageHandler(Filters.sticker , echo_sticker))
 
 	get_logger(__name__).info('starting quark_bot')

@@ -19,8 +19,7 @@ def log(func):
 	def wrapped(bot, update, *args, **kwargs):
 		logger = get_logger(func.__name__)
 		logger.info(
-			'{} from {}({})'.format(
-				func.__name__,
+			'user: {}({})'.format(
 				update.message.from_user.username,
 				update.message.from_user.id
 			)
@@ -30,6 +29,25 @@ def log(func):
 
 	return wrapped
 
+def log_command(name, user):
+	logger = get_logger(name)
+	logger.info(
+		'command called by {}({})'.format(
+			user.username,
+			user.id,
+		)
+	)
+
+
+def echo_text(bot, update):
+	msg = update.message
+
+	bot.send_message(
+		chat_id=msg.chat_id,
+		text=msg.text
+	)
+
+
 def restricted(func):
 	@wraps(func)
 	def wrapped(bot, update, *args, **kwargs):
@@ -37,7 +55,7 @@ def restricted(func):
 		user_id = update.effective_user.id
 
 		if user_id not in LIST_OF_ADMINS:
-			bot.send_message(chat_id=update.message.chat_id, text='Unauthorized access denied.')
+			echo_text(bot, update)
 			logger.warning(
 				"Unauthorized access denied for {}({})".format(
 					update.effective_user.username,
@@ -49,6 +67,7 @@ def restricted(func):
 		return func(bot, update, *args, **kwargs)
 
 	return wrapped
+
 
 def send_multiple_messages(bot, chat_id, msgs=[]):
 	for msg in msgs:
