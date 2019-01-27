@@ -6,7 +6,7 @@ class Quark:
 
 	def __init__(self, owner):
 		self.owner = owner
-		self.log = []
+		self.log = [] 
 		self.default_wallet = 0
 		self.inspect()
 

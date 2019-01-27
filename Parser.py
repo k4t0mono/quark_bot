@@ -8,32 +8,36 @@ class CommandType(Enum):
 
 
 def parse(txt):
-	if txt[0] == '.':
-		return parse_command(txt)
+	words = txt.split()
+
+	if words[0][0] == '.':
+		return parse_command(words)
 	else:
-		return parse_entry(txt)
+		return parse_entry(words)
 
 
-def parse_command(txt):
-	if txt.split('.')[1] == 'log':
-		return CommandType.LOG
+def parse_command(words):
+	if words[0].split('.')[1] == 'log':
+		wallet = words[1] if len(words) > 1 else None
+		return (CommandType.LOG, wallet)
 	else:
-		return CommandType.OTHER
+		return parse_entry(words)
 
 
-def parse_entry(txt):
-	l = txt.split()
-	l[0] = l[0].replace(',', '.')
-	print(l)
+def parse_entry(words):
+	if len(words) < 2:
+		return (CommandType.OTHER, )
 
-	n = re.compile('\d*\.\d{0,2}')
-	if n.match(l[0]):
-		amout = float(l[0])
-		desc = l[1]
-		wallet = l[2] if len(l) > 2 else None
+	words[0] = words[0].replace(',', '.')
+
+	n = re.compile('\d*(\.\d{1,2})?')
+	if n.match(words[0]):
+		amout = float(words[0])
+		desc = words[1]
+		wallet = words[2] if len(words) > 2 else None
 
 		return (CommandType.ENTRY, amout, desc, wallet)
 
 	else:
-		return CommandType.OTHER
+		return (CommandType.OTHER, )
 

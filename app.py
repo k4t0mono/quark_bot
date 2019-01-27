@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler
-from utils import get_logger, restricted, log, log_command
+from utils import get_logger, restricted, log, log_command, echo_text
 from pprint import pprint
 from random import choice
 from Quark import Quark
@@ -14,24 +14,24 @@ QUARK = Quark('k4t0mono')
 @restricted
 def command_parse(bot, update):
 	text = update.message.text
+
 	ct = parse(text)
-	print(ct)
+	if ct[0] == CommandType.LOG:
+		wallet = ct[1]
+		log = QUARK.get_log(wallet=wallet)
+		post_log(bot, update, log, wallet)
+	
+	elif ct[0] == CommandType.ENTRY:
+		(_, amount, desc, wallet) = ct
+		QUARK.add_transaction(amount, desc, wallet=wallet)
+		bot.send_message(
+			chat_id=update.message.chat_id,
+			text='Transaction added'
+		)
 
-	# if(text[0] == '.'):
-		# (commad, *stuff) = text[1:].split()
+	elif ct[0] == CommandType.OTHER:
+		echo_text(bot, update)
 
-		# if commad == 'log':
-			# wallet = stuff[0] if len(stuff) else None
-			# log = QUARK.get_log(wallet=wallet)
-			# post_log(bot, update, log, wallet)
-
-	# else:
-		# (amout, desc) = text.split()
-		# QUARK.add_transaction(amout, desc)
-		# bot.send_message(
-			# chat_id=update.message.chat_id,
-			# text='Transaction added'
-		# )
 
 
 @log
