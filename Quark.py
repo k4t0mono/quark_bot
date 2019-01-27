@@ -7,13 +7,15 @@ class Quark:
 	def __init__(self, owner):
 		self.owner = owner
 		self.log = [] 
+		self.balance = 0.0
 		self.default_wallet = 0
 		self.inspect()
 
-	def add_transaction(self, amout, desc, **kwargs):
+	def add_transaction(self, amount, desc, **kwargs):
 		wallet = self.get_wallet(kwargs)
 
-		transaction = Transaction(amout, desc, wallet, -1)
+		transaction = Transaction(amount, desc, wallet, -1)
+		self.balance += amount
 
 		get_logger('Quark.add_transaction').info(
 			'new transaction {}'.format(transaction)
@@ -21,11 +23,13 @@ class Quark:
 		self.log.append(transaction)
 		self.inspect()
 
+		return self.balance
+
 	def get_log(self, **kwargs):
 		wallet = self.get_wallet(kwargs)
 
 		log = [t for t in self.log if t.wallet == wallet]
-		return log
+		return log[-10:]
 
 
 	def get_wallet(self, kwargs):

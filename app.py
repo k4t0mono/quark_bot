@@ -23,15 +23,15 @@ def command_parse(bot, update):
 	
 	elif ct[0] == CommandType.ENTRY:
 		(_, amount, desc, wallet) = ct
-		QUARK.add_transaction(amount, desc, wallet=wallet)
+		balance = QUARK.add_transaction(amount, desc, wallet=wallet)
 		bot.send_message(
 			chat_id=update.message.chat_id,
-			text='Transaction added'
+			parse_mode='Markdown',
+			text='Transaction added\n*Balance: {:.2f}*'.format(balance)
 		)
 
 	elif ct[0] == CommandType.OTHER:
 		echo_text(bot, update)
-
 
 
 @log
