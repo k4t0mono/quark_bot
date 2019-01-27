@@ -5,6 +5,7 @@ from utils import get_logger, restricted, log, log_command
 from pprint import pprint
 from random import choice
 from Quark import Quark
+from Parser import parse, CommandType
 
 
 QUARK = Quark('k4t0mono')
@@ -13,22 +14,24 @@ QUARK = Quark('k4t0mono')
 @restricted
 def command_parse(bot, update):
 	text = update.message.text
+	ct = parse(text)
+	print(ct)
 
-	if(text[0] == '.'):
-		(commad, *stuff) = text[1:].split()
+	# if(text[0] == '.'):
+		# (commad, *stuff) = text[1:].split()
 
-		if commad == 'log':
-			wallet = stuff[0] if len(stuff) else None
-			log = QUARK.get_log(wallet=wallet)
-			post_log(bot, update, log, wallet)
+		# if commad == 'log':
+			# wallet = stuff[0] if len(stuff) else None
+			# log = QUARK.get_log(wallet=wallet)
+			# post_log(bot, update, log, wallet)
 
-	else:
-		(amout, desc) = text.split()
-		QUARK.add_transaction(amout, desc)
-		bot.send_message(
-			chat_id=update.message.chat_id,
-			text='Transaction added'
-		)
+	# else:
+		# (amout, desc) = text.split()
+		# QUARK.add_transaction(amout, desc)
+		# bot.send_message(
+			# chat_id=update.message.chat_id,
+			# text='Transaction added'
+		# )
 
 
 @log
@@ -71,21 +74,6 @@ Commands:
 
 *.log <wallet>*
 Get all transactions from the wallet
-
-*/new_wallet <name> [balance]*
-Add a new wallet to the list
-
-*/list_wallets*
-List the avaliable wallets
-
-*/set_default <name>*
-Set the default wallet for transactions
-
-*/get_default*
-Get the default wallet
-
-*/log*
-Get all transactions
 
 To add a new transaction just add send a message on the format:
 <desc> <value> [wallet]
